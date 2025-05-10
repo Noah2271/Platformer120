@@ -181,6 +181,9 @@ update() {
                 this.JUMPCOUNT = 0;
                 this.justBurst = false;
             }
+            if (this.JUMPCOUNT !== 0 && !this.spaceKey.isDown){
+                this.JUMPCOUNT = 0;
+            }
         }
         if (!this.disableDrag){                                                                 // Drag Handling For Burst
             p.setDragX(this.DRAG);
