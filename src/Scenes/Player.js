@@ -7,7 +7,7 @@ export class PlayerControls {
         // player variables
         this.JUMP_VELOCITY = -500;
         this.ACCELERATION = 300;
-        this.DRAG = 9000;
+        this.DRAG = 1500;
         this.JUMPCOUNT = 0;
         this.burst = 300;
         this.justBurst = false;
@@ -82,11 +82,16 @@ export class PlayerControls {
             this.disableDrag = true;                            // disableDrag flag to disable drag until the ground touched for the dive
         }
         // ground variable resets
-        if (p.body.blocked.down && this.JUMPCOUNT >= 1 && !this.spaceKey.isDown){
-            this.JUMPCOUNT = 0;                                 // when player touches ground and spacekey is released, reset all jump related variables
-            this.disableDrag = false;
-            this.justBurst = false;
-            console.log(this.JUMPCOUNT);
+        if (p.body.blocked.down) {
+            if (this.JUMPCOUNT === 2) {
+                this.disableDrag = false;
+            }
+        
+            if (this.JUMPCOUNT >= 1 && !this.spaceKey.isDown) {
+                this.JUMPCOUNT = 0;
+                this.justBurst = false;
+                console.log(this.JUMPCOUNT);
+            }
         }
 
         if (!this.disableDrag){                                 // drag handling
