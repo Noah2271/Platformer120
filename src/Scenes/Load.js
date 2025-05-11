@@ -31,6 +31,7 @@ export class Load extends Phaser.Scene {
         this.load.audio("stepTest2", "soundTwo.wav");
         this.load.audio("jumpSound", "Jump.wav");
         this.load.audio("dashSound", "Dash.wav");
+        this.load.audio("coinCollect", "coinSound.wav");
     }
 
     create() {
