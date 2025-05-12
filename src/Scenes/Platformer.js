@@ -71,8 +71,17 @@ create() {
         this.physics.world.debugGraphic.clear();
     }, this);
 
-this.dialogueBox = this.add.bitmapText(16, 500, 'pixelText', "", 24) 
+// First, create the shadow text
+this.dialogueBoxShadow = this.add.bitmapText(16 + 2, 500 + 2, 'pixelText', "", 24)
     .setScrollFactor(0)
+    .setTintFill(0x000000)  // Black color
+        .setBlendMode(Phaser.BlendModes.MULTIPLY)
+    .setVisible(false);
+
+// Then create the real text
+this.dialogueBox = this.add.bitmapText(16, 500, 'pixelText', "", 24)
+    .setScrollFactor(0)
+    .setTintFill(0xFFFFFF)  // White color (optional if your font is already white)
     .setVisible(false);
     // NEW
     const signObjects = this.map.getObjectLayer("Sign").objects;
@@ -103,6 +112,9 @@ showSignText(player, sign) {
             console.log(sign.Text);
         this.dialogueBox.setText(sign.Text); // <- access the Text property stored in hitbox
         this.dialogueBox.setVisible(true);
+        this.dialogueBoxShadow.setText(sign.Text);
+        this.dialogueBoxShadow.setVisible(true);
+        
     }
 }
 
