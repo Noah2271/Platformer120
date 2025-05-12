@@ -15,7 +15,8 @@ create() {
     this.score = 0;
     this.scoreText = this.add.bitmapText(16, 16, 'pixelText', 'Coin: 0', 32);
     this.scoreText.setTintFill(0xFFFF00);
-
+    this.signs = [];
+    this.tKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.T);
 
 
     // Create tilemap and layers
@@ -27,12 +28,15 @@ create() {
     this.decorationLayer = this.map.createLayer("Decoration", this.tileset, 0, 0);
     this.decorationLayerTwo = this.map.createLayer("Decoration-2", this.tileset, 0, 0);
     this.coinLayer = this.map.createLayer("Coin", this.tileset, 0, 0);
-
+    this.signLayer = this.map.createLayer("SignLayer", this.tileset, 0,0);
     this.groundLayer.setScale(2.0);
     this.groundLayerBacked.setScale(2.0);
     this.decorationLayer.setScale(2.0);
     this.decorationLayerTwo.setScale(2.0);
     this.coinLayer.setScale(2.0);
+    this.signLayer.setScale(2.0);
+
+    
 
     // Enable collisions
     this.groundLayer.setCollisionByProperty({ collides: true });
@@ -48,18 +52,58 @@ create() {
 
     // Player creation and controls
     this.playerControls = new PlayerControls(this, this.cursors);
-    const player = this.playerControls.getSprite();
+    this.player = this.playerControls.getSprite();
+
+    // Cam
+    this.cameras.main.startFollow(this.player, true, 0.1, 0.1); 
+    this.cameras.main.setZoom(1.2);                                                         // Note: Causes Some Visual Artifacts
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+    this.cameras.main.setDeadzone(100, 100);
 
     // Colliders
-    this.physics.add.collider(player, this.groundLayer, this.handleDeadlyTiles, this.oneWayPlatformCollide, this);
-    this.physics.add.collider(player, this.groundLayerBacked, this.handleDeadlyTiles, this.oneWayPlatformCollide, this);
-    this.physics.add.overlap(player, this.coinLayer, this.collectCoin, null, this)
-
+    this.physics.add.collider(this.player, this.groundLayer, this.handleDeadlyTiles, this.oneWayPlatformCollide, this);
+    this.physics.add.collider(this.player, this.groundLayerBacked, this.handleDeadlyTiles, this.oneWayPlatformCollide, this);
+    this.physics.add.overlap(this.player, this.coinLayer, this.collectCoin, null, this)
+    
     // Debug Key
     this.input.keyboard.on('keydown-D', () => {
         this.physics.world.drawDebug = !this.physics.world.drawDebug;
         this.physics.world.debugGraphic.clear();
     }, this);
+
+this.dialogueBox = this.add.bitmapText(16, 500, 'pixelText', "", 24) 
+    .setScrollFactor(0)
+    .setVisible(false);
+    // NEW
+    const signObjects = this.map.getObjectLayer("Sign").objects;
+
+    this.signs = this.physics.add.staticGroup();
+
+    signObjects.forEach(sign => {
+        const hitbox = this.signs.create(sign.x * 2, sign.y * 2, 'blank') // good
+            .setOrigin(0, 1)
+            .setDisplaySize(sign.width, sign.height)
+            .setVisible(false); // invisible
+
+        // DO NOT CALL this.physics.add.existing(hitbox, true);
+
+        if (sign.properties) {
+            sign.properties.forEach(p => {
+                hitbox[p.name] = p.value;
+            });
+        }
+    });
+
+    // Now setup overlap (one time!)
+    this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);
+    }
+
+showSignText(player, sign) {
+    if (Phaser.Input.Keyboard.JustDown(this.tKey)) {
+            console.log(sign.Text);
+        this.dialogueBox.setText(sign.Text); // <- access the Text property stored in hitbox
+        this.dialogueBox.setVisible(true);
+    }
 }
 
     // One Way Pass Filter For Platforms
@@ -118,5 +162,7 @@ fadeOut = (particle, duration, float) => {
     // Update Function
 update() {
     this.playerControls.update();
+    
+
     }
 }
