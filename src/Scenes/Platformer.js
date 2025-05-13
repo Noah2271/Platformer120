@@ -71,46 +71,42 @@ create() {
         this.physics.world.debugGraphic.clear();
     }, this);
 
-// First, create the shadow text
-this.dialogueBoxShadow = this.add.bitmapText(16 + 2, 500 + 2, 'pixelText', "", 24)
-    .setScrollFactor(0)
-    .setTintFill(0x000000)  // Black color
-        .setBlendMode(Phaser.BlendModes.MULTIPLY)
-    .setVisible(false);
+    // Sign Text Box Shadow
+    this.dialogueBoxShadow = this.add.bitmapText(452, 700 + 2, 'pixelText', "", 24)
+        .setScrollFactor(0)
+        .setTintFill(0x000000)  // Black color
+            .setBlendMode(Phaser.BlendModes.MULTIPLY)
+        .setVisible(false);
 
-// Then create the real text
-this.dialogueBox = this.add.bitmapText(16, 500, 'pixelText', "", 24)
-    .setScrollFactor(0)
-    .setTintFill(0xFFFFFF)  // White color (optional if your font is already white)
-    .setVisible(false);
-    // NEW
-    const signObjects = this.map.getObjectLayer("Sign").objects;
+    // Sign Text Box Real
+    this.dialogueBox = this.add.bitmapText(450, 700, 'pixelText', "", 24)
+        .setScrollFactor(0)
+        .setTintFill(0xFFFFFF)  // White color (optional if your font is already white)
+        .setVisible(false);
+    // Object layer for signs handling, get text property
+    const signObjects = this.map.getObjectLayer("Sign").objects;                            // Get the Object Layers Objects
 
-    this.signs = this.physics.add.staticGroup();
+    this.signs = this.physics.add.staticGroup();                                            // Assign the objects to a static group, no physics
 
-    signObjects.forEach(sign => {
+    signObjects.forEach(sign => {                                                           // For each object, create hitbox at its position (scale by 2 since original scale)
         const hitbox = this.signs.create(sign.x * 2, sign.y * 2, 'blank') // good
             .setOrigin(0, 1)
             .setDisplaySize(sign.width, sign.height)
             .setVisible(false); // invisible
-
-        // DO NOT CALL this.physics.add.existing(hitbox, true);
-
-        if (sign.properties) {
+        if (sign.properties) {                                                              // If the sign has a text value, store it w/ the hitbox to grab in showSignText
             sign.properties.forEach(p => {
                 hitbox[p.name] = p.value;
             });
         }
     });
 
-    // Now setup overlap (one time!)
-    this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);
+    this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);       // Create physics overlap between player and the signs that call showSignText on overlap.
     }
 
 showSignText(player, sign) {
-    if (Phaser.Input.Keyboard.JustDown(this.tKey)) {
-            console.log(sign.Text);
-        this.dialogueBox.setText(sign.Text); // <- access the Text property stored in hitbox
+    if (Phaser.Input.Keyboard.JustDown(this.tKey)) {                                        // Called whenever overlapping. If press T on overlap, fetch .Text property and set
+            console.log(sign.Text);                                                         // dialogue visibility to true
+        this.dialogueBox.setText(sign.Text);            
         this.dialogueBox.setVisible(true);
         this.dialogueBoxShadow.setText(sign.Text);
         this.dialogueBoxShadow.setVisible(true);
