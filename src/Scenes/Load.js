@@ -11,6 +11,7 @@ export class Load extends Phaser.Scene {
 
         // Load tilemap information
         this.load.image("tilemap_tiles", "tilemap_packed.png");                         // Packed tilemap
+        this.load.image("background_tiles", "tilemap-backgrounds_packed.png");
         this.load.tilemapTiledJSON("platformer-level-1", "platformer-level-1.tmj");   // Tilemap in JSON
         this.load.image("runParticles1", "dirt_01.png");
         this.load.image("runParticles2", "dirt_02.png");
@@ -32,9 +33,24 @@ export class Load extends Phaser.Scene {
         this.load.audio("jumpSound", "Jump.wav");
         this.load.audio("dashSound", "Dash.wav");
         this.load.audio("coinCollect", "coinSound.wav");
+        this.load.audio("dialogue", "dialogue.wav");
+        this.load.audio("boom", "biboBoom.wav");
     }
 
     create() {
+
+        this.anims.create({
+            key: 'biboBoom',
+            frames: [
+                {key: "biboBoomParticles1"},
+                {key: "biboBoomParticles2"},
+                {key: "biboBoomParticles3"},
+            ],
+            frameRate: 10,
+            repeat: 1,
+            hideOnComplete: true
+        });
+
         this.anims.create({
             key: 'walk',
             frames: this.anims.generateFrameNames('platformer_characters', {
