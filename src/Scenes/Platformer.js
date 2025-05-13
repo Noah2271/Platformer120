@@ -20,6 +20,9 @@ create() {
     this.spawnpointX = this.game.config.width / 19;
     this.spawnpointY = this.game.config.height / 1.4;
     this.lives = 3;
+    this.isDying = false;
+    this.gameOver = false;
+    this.gameComplete = false;
 
     // Create tilemap and layers
     this.map = this.make.tilemap({ key: "platformer-level-1" });
@@ -83,13 +86,14 @@ create() {
     // special depths
     this.decorationLayer.setDepth(10); // Decoration on top
     this.player.setDepth(5);            // Player below
+    
     // Text
     // Stat Texts
-
     this.scoreText = this.add.text(16, 16, 'Score: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#000000'})
     .setScrollFactor(0);
     this.liveText = this.add.text(16, 40, 'Lives: 3', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#000000'})
     .setScrollFactor(0);
+
     // Dialogue Frame
     this.box = this.add.graphics()
         .fillStyle(0x000000, 0.7)
@@ -103,7 +107,7 @@ create() {
         .setVisible(false);
 
     // Sign Prompt For Starters
-    this.pressTPrompt = this.add.text(this.player.x, this.player.y - 40, 'Press T to read signs!', { fontFamily: 'SilkScreen', fontSize: '16px', color: '#FFFFFF' })
+    this.pressTPrompt = this.add.text(this.player.x, this.player.y - 40, 'PRESS [T] TO READ SIGNS!', { fontFamily: 'SilkScreen', fontSize: '16px', color: '#FFFFFF' })
         .setOrigin(0.5)
         .setScrollFactor(0) 
         .setVisible(false);
@@ -143,12 +147,12 @@ showSignText(player, sign) {
     // Dynamically update the textbox to match the length of the dialogue
 dialogueBorderUpdate(){
     const padding = 10;
-    const textWidth = this.dialogueBox.width;   // get width and height of text for measurement
+    const textWidth = this.dialogueBox.width;                                               // get width and height of text for measurement
     const textHeight = this.dialogueBox.height;
-    const boxWidth = textWidth + padding * 2;   // get box dimensions based off text
+    const boxWidth = textWidth + padding * 2;                                               // get box dimensions based off text
     const boxHeight = textHeight + padding * 2;
-    this.box.clear();                           // destroy the previous box
-    this.box.fillStyle(0x000000, 0.7);          // below sets the new box
+    this.box.clear();                                                                       // destroy the previous box
+    this.box.fillStyle(0x000000, 0.7);                                                      // below sets the new box
     this.box.fillRect(this.dialogueBox.x - padding, this.dialogueBox.y - padding, boxWidth, boxHeight);
     this.box.lineStyle(2, 0xffffff, 1);
     this.box.strokeRect(this.dialogueBox.x - padding, this.dialogueBox.y - padding, boxWidth, boxHeight);
@@ -161,8 +165,9 @@ oneWayPlatformCollide(player, tile) {
 
     // Player 'death' Restart Function
 handleDeadlyTiles(player, tile) {
-    if(tile.properties.deadly){
-        console.log("bals");
+
+    if(tile.properties.deadly && this.isDying == false && !this.gameOver){
+        console.log("PLAYER DIED");
         const biboBoom = this.add.sprite(this.player.x, this.player.y, 'biboBoom');
         biboBoom.setScale(0.2);
         biboBoom.setBlendMode(Phaser.BlendModes.SCREEN);
@@ -172,7 +177,8 @@ handleDeadlyTiles(player, tile) {
         this.fadeOut(biboBoom, 500, 20);
         this.lives -= 1;
         this.liveText.setText('Lives: ' + this.lives);
-        this.player.setPosition(this.spawnpointX, this.spawnpointY);
+        this.isDying = true;
+        this.fadeOut(this.player, 500, -50);
     }
 }
 
@@ -211,13 +217,26 @@ fadeOut = (particle, duration, float) => {
         duration: duration,       
         ease: 'Linear',
         onComplete: () => {
+            if(particle != this.player){
             particle.destroy(); 
+            } else {
+            if(this.lives !== 0){
+            this.player.setPosition(this.spawnpointX, this.spawnpointY);
+            this.player.alpha = 100;
+            this.isDying = false;
+            }
+            if(this.lives === 0){
+            this.player.alpha = 100;
+            this.gameOver = true;
+            }
         }
+    }
     });
 }
 
     // Update Function
 update() {
+    if(!this.gameOver){
     this.playerControls.update();
         const touchingSign = this.physics.overlap(this.player, this.signs);
 
@@ -231,9 +250,22 @@ update() {
         this.pressTPrompt.setVisible(true);
         this.pressTPrompt.x = this.player.x;
         this.pressTPrompt.y = this.player.y - 40;
-    } else {
+        } else {
         this.pressTPrompt.setVisible(false);
-
     }
 }
+    // Lose Screen
+    if(this.gameOver){
+        this.player.destroy();
+        this.player.setVisible(false);
+        this.dialogueBox.setText('You died, sandwichless.\nTotal Coins: ' + this.score + '\nPress R to Try Again.')
+        this.dialogueBorderUpdate();
+        this.dialogueBox.setVisible(true);
+        this.box.setVisible(true);
+        this.input.keyboard.on('keydown-R', () => {
+        this.scene.restart();
+    }, this);
+    }
+    
+    }
 }
