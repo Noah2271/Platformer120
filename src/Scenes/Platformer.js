@@ -48,24 +48,16 @@ create() {
     this.parallaxLayerOne.setScrollFactor(0.5); 
 
     // Enemies
-    this.enemySpawns = [[1000, 300]]; // <-- store it on "this" so you can reuse later if needed
+    this.enemySpawns = [[1000, 300]];                                                               
     this.enemies = this.physics.add.group();
     this.enemyObjects = [];
 
-    // Loop through spawn points
+    // Spawn Enemies at each spawnpoint and push to group
     for (let spawn of this.enemySpawns) {
         const [x, y] = spawn;
-
-        // Create enemy
         const enemy = new EnemyControls(this, x, y, 'enemySprite', this.groundLayer);
-
-        // Add sprite to physics group
         this.enemies.add(enemy.getSprite());
-
-        // Mark sprite as deadly
         enemy.getSprite().deadly = true;
-
-        // Track the enemy controller for updating AI
         this.enemyObjects.push(enemy);
     }
 
@@ -112,7 +104,7 @@ create() {
     this.signLayer.setDepth(13);
     this.player.setDepth(12);
     this.decorationLayerTwo.setDepth(11);
-    this.decorationLayer.setDepth(10); // Decoration on top
+    this.decorationLayer.setDepth(10); 
     
     // Text
     // Stat Texts
@@ -140,6 +132,7 @@ create() {
     this.box.setDepth(100);
     this.dialogueBox.setDepth(100);
     this.pressTPrompt.setDepth(100);
+    
     // Object layer for signs handling, get text property
     const signObjects = this.map.getObjectLayer("Sign").objects;                            // Get the Object Layers Objects
 

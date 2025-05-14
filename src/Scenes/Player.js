@@ -84,7 +84,9 @@ update() {
         // Set shorthand p to player
     const p = this.player;
         // Player Left and Right Movement Implementation
-
+    if(p.body.blocked.left || p.body.blocked.right){
+        p.anims.play('idle');
+    }
     if (this.cursors.left.isDown) {     
         if (!this.justBurst){
             p.setAccelerationX(-this.ACCELERATION);                                             // Only allow player acceleration when NOT in the dive. (They can stop the dive velocity as a cancel, but they wont move the other way. The dive is a commitment.)
@@ -92,6 +94,7 @@ update() {
         if (p.body.velocity.x < 0){                                                             // If moving in the left direction, reset flip in the case the right key was pressed beforehand, play walk animation
             p.resetFlip();
             p.anims.play('walk', true)
+            this.playStepSound(p);
         } else {
             p.setVelocityX(0);                                                                  // Support for instant turning. If player presses right key will reset velocity
         }
@@ -105,6 +108,7 @@ update() {
         if (p.body.velocity.x > 0){                                                             // If moving in the right direction, set flip in the case the left key pressed beforehand, play walk animation
             p.setFlip(true, false);
             p.anims.play('walk', true);
+            this.playStepSound(p);
         } else {
             p.setVelocityX(0);                                                                  // Support for instant turning in the other direction
         }
@@ -123,10 +127,6 @@ update() {
                 this.lastDustTime = this.scene.time.now;                                        // Keep Track of When Dust was last Created, used similar to the sound function
             }
         }
-    }
-
-    if (this.cursors.left.isDown || this.cursors.right.isDown) {
-        this.playStepSound(p);
     }
     if (!p.body.blocked.down) {                                                                 // If bottom of player character not touching a ground tile, play jump animation
         p.anims.play('jump');
