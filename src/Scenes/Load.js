@@ -65,6 +65,19 @@ export class Load extends Phaser.Scene {
         });
 
         this.anims.create({
+            key: 'enemyWalk',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 18,
+                end: 19,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        this.anims.create({
             key: 'idle',
             defaultTextureKey: "platformer_characters",
             frames: [

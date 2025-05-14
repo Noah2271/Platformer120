@@ -1,5 +1,5 @@
 import { PlayerControls } from './Player.js';
-
+import { EnemyControls } from './Enemies.js'
 export class Platformer extends Phaser.Scene {
     constructor() {
         super("platformerScene");
@@ -29,7 +29,7 @@ create() {
     this.tileset = this.map.addTilesetImage("kenny_tilemap_packed", "tilemap_tiles");
     this.backgroundset = this.map.addTilesetImage("kenny_background", "background_tiles");
 
-    this.parallaxLayerOne = this.map.createLayer("Parallax-1", this.backgroundset, 0,0);
+    this.parallaxLayerOne = this.map.createLayer("BackLayer", this.backgroundset, 0,0);
     this.groundLayerBacked = this.map.createLayer("Background-Ground", this.tileset, 0, 0);
     this.groundLayer = this.map.createLayer("Ground", this.tileset, 0, 0);
     this.decorationLayer = this.map.createLayer("Decoration", this.tileset, 0, 0);
@@ -47,7 +47,31 @@ create() {
     // Parallax
     this.parallaxLayerOne.setScrollFactor(0.5); 
 
+    // Enemies
+    this.enemySpawns = [[1000, 300]]; // <-- store it on "this" so you can reuse later if needed
+    this.enemies = this.physics.add.group();
+    this.enemyObjects = [];
 
+    // Loop through spawn points
+    for (let spawn of this.enemySpawns) {
+        const [x, y] = spawn;
+
+        // Create enemy
+        const enemy = new EnemyControls(this, x, y, 'enemySprite', this.groundLayer);
+
+        // Add sprite to physics group
+        this.enemies.add(enemy.getSprite());
+
+        // Mark sprite as deadly
+        enemy.getSprite().deadly = true;
+
+        // Track the enemy controller for updating AI
+        this.enemyObjects.push(enemy);
+    }
+
+    // Setup collision between enemies and ground
+    this.physics.add.collider(this.enemies, this.groundLayer);
+    
     // Enable collisions
     this.groundLayer.setCollisionByProperty({ collides: true });
     this.groundLayerBacked.setCollisionByProperty({ collides: true });
@@ -64,6 +88,7 @@ create() {
     this.playerControls = new PlayerControls(this, this.cursors);
     this.player = this.playerControls.getSprite();
     this.player.setPosition(this.spawnpointX, this.spawnpointY);
+    this.physics.add.collider(this.enemies, this.player, this.handleDeadlyTiles, null, this);
 
     // Cam
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
@@ -84,8 +109,10 @@ create() {
     }, this);
 
     // special depths
+    this.signLayer.setDepth(13);
+    this.player.setDepth(12);
+    this.decorationLayerTwo.setDepth(11);
     this.decorationLayer.setDepth(10); // Decoration on top
-    this.player.setDepth(5);            // Player below
     
     // Text
     // Stat Texts
@@ -109,9 +136,10 @@ create() {
     // Sign Prompt For Starters
     this.pressTPrompt = this.add.text(this.player.x, this.player.y - 40, 'PRESS [T] TO READ SIGNS!', { fontFamily: 'SilkScreen', fontSize: '16px', color: '#FFFFFF' })
         .setOrigin(0.5)
-        .setScrollFactor(0) 
         .setVisible(false);
-
+    this.box.setDepth(100);
+    this.dialogueBox.setDepth(100);
+    this.pressTPrompt.setDepth(100);
     // Object layer for signs handling, get text property
     const signObjects = this.map.getObjectLayer("Sign").objects;                            // Get the Object Layers Objects
 
@@ -165,8 +193,9 @@ oneWayPlatformCollide(player, tile) {
 
     // Player 'death' Restart Function
 handleDeadlyTiles(player, tile) {
+    const isDeadly = (tile.properties && tile.properties.deadly) || tile.deadly;
 
-    if(tile.properties.deadly && this.isDying == false && !this.gameOver){
+    if (isDeadly && this.isDying == false && !this.gameOver) {
         console.log("PLAYER DIED");
         const biboBoom = this.add.sprite(this.player.x, this.player.y, 'biboBoom');
         biboBoom.setScale(0.2);
@@ -179,6 +208,7 @@ handleDeadlyTiles(player, tile) {
         this.liveText.setText('Lives: ' + this.lives);
         this.isDying = true;
         this.fadeOut(this.player, 500, -50);
+        
     }
 }
 
@@ -237,6 +267,10 @@ fadeOut = (particle, duration, float) => {
     // Update Function
 update() {
     if(!this.gameOver){
+        this.enemyObjects.forEach(enemy => {
+        enemy.update();
+    });
+    
     this.playerControls.update();
         const touchingSign = this.physics.overlap(this.player, this.signs);
 
