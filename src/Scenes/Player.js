@@ -22,7 +22,7 @@ export class PlayerControls {
             "platformer_characters"
         );
         this.player.setScale(2.0);
-        this.player.setCollideWorldBounds(true);
+        this.player.setCollideWorldBounds(true)
         this.player.setDragX(this.DRAG);
         this.scene.physics.world.gravity.y = 1500;
         this.runParticles = scene.add.sprite(this.player.x, this.player.y, 'runParticles1');    // Have to individually set this here since run particles are constantly made behind the player, just invisible until specified.

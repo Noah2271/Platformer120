@@ -20,10 +20,10 @@ Game Restart : X
 Parallax Background : X +19
 Complex Camera : W.I.P (27.5 Tentatively, pan camera all the way ONLY on the other side of the level).
 Double Jumping / Wall Jumping : X +19.5
-Alternate Player Movement :
+Alternate Player Movement : No
 Juicy Juice: 
 Player Death : X 21.5
-Enemies : PLANNED (25.5 Tentatively)
+Enemies : X 23.5 MOST RECENT
 Puzzles :
 Secret Levels : 
 Power Ups : PLANNED (28 Tentatively)

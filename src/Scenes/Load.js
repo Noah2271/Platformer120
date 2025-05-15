@@ -8,11 +8,19 @@ export class Load extends Phaser.Scene {
 
         // Load characters spritesheet
         this.load.atlas("platformer_characters", "tilemap-characters-packed.png", "tilemap-characters-packed.json");
+        this.load.tilemapTiledJSON('myTilemap', 'assets/platformer-level-1.json');                                          // Properly Load the Tilemap, might adjust so coin uses this now instead of cropping it. Not mandatory though.
+        this.load.image('tilemap_packed', 'tilemap_packed.png');
+        this.load.spritesheet('kenny_tiles', 'tilemap_packed.png', {
+            frameWidth: 18,
+            frameHeight: 18,
+            margin: 0,
+            spacing: 0
+        });
 
         // Load tilemap information
-        this.load.image("tilemap_tiles", "tilemap_packed.png");                         // Packed tilemap
+        this.load.image("tilemap_tiles", "tilemap_packed.png");                         
         this.load.image("background_tiles", "tilemap-backgrounds_packed.png");
-        this.load.tilemapTiledJSON("platformer-level-1", "platformer-level-1.tmj");   // Tilemap in JSON
+        this.load.tilemapTiledJSON("platformer-level-1", "platformer-level-1.tmj");   
         this.load.image("runParticles1", "dirt_01.png");
         this.load.image("runParticles2", "dirt_02.png");
         this.load.image("runParticles3", "dirt_03.png");

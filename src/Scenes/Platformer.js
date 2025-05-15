@@ -27,8 +27,8 @@ create() {
     // Create tilemap and layers
     this.map = this.make.tilemap({ key: "platformer-level-1" });
     this.tileset = this.map.addTilesetImage("kenny_tilemap_packed", "tilemap_tiles");
-    this.backgroundset = this.map.addTilesetImage("kenny_background", "background_tiles");
-
+    this.backgroundset = this.map.addTilesetImage("kenny_background", "background_tiles");                  
+    this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);                        // Fix Boundaries, previously sticking to default screen size
     this.parallaxLayerOne = this.map.createLayer("BackLayer", this.backgroundset, 0,0);
     this.groundLayerBacked = this.map.createLayer("Background-Ground", this.tileset, 0, 0);
     this.groundLayer = this.map.createLayer("Ground", this.tileset, 0, 0);
@@ -36,6 +36,7 @@ create() {
     this.decorationLayerTwo = this.map.createLayer("Decoration-2", this.tileset, 0, 0);
     this.coinLayer = this.map.createLayer("Coin", this.tileset, 0, 0);
     this.signLayer = this.map.createLayer("SignLayer", this.tileset, 0,0);
+    this.impassibleLayer= this.map.createLayer("Blockade", this.tileset, 0,0);
     this.groundLayer.setScale(2.0);
     this.groundLayerBacked.setScale(2.0);
     this.decorationLayer.setScale(2.0);
@@ -43,6 +44,7 @@ create() {
     this.coinLayer.setScale(2.0);
     this.signLayer.setScale(2.0);
     this.parallaxLayerOne.setScale(2.0);
+    this.impassibleLayer.setScale(2.0);
 
     // Parallax
     this.parallaxLayerOne.setScrollFactor(0.5); 
@@ -67,6 +69,7 @@ create() {
     // Enable collisions
     this.groundLayer.setCollisionByProperty({ collides: true });
     this.groundLayerBacked.setCollisionByProperty({ collides: true });
+    this.impassibleLayer.setCollisionByProperty({ collides: true });
     this.coinLayer.setCollisionByExclusion([-1]);
 
     // Enable Animations / Sound
@@ -92,6 +95,7 @@ create() {
     // Colliders
     this.physics.add.collider(this.player, this.groundLayer, this.handleDeadlyTiles, this.oneWayPlatformCollide, this);
     this.physics.add.collider(this.player, this.groundLayerBacked, this.handleDeadlyTiles, this.oneWayPlatformCollide, this);
+    this.physics.add.collider(this.player, this.impassibleLayer, null, null, this);
     this.physics.add.overlap(this.player, this.coinLayer, this.collectCoin, null, this)
     
     // Debug Key
@@ -100,7 +104,7 @@ create() {
         this.physics.world.debugGraphic.clear();
     }, this);
 
-    // special depths
+    // Special depths
     this.signLayer.setDepth(13);
     this.player.setDepth(12);
     this.decorationLayerTwo.setDepth(11);
@@ -133,23 +137,53 @@ create() {
     this.dialogueBox.setDepth(100);
     this.pressTPrompt.setDepth(100);
     
-    // Object layer for signs handling, get text property
-    const signObjects = this.map.getObjectLayer("Sign").objects;                            // Get the Object Layers Objects
-
-    this.signs = this.physics.add.staticGroup();                                            // Assign the objects to a static group, no physics
-
-    signObjects.forEach(sign => {                                                           // For each object, create hitbox at its position (scale by 2 since original scale)
-        const hitbox = this.signs.create(sign.x * 2, sign.y * 2, 'blank') // good
+    // Interactables Set Up
+    const interactableObjects = this.map.getObjectLayer("Interactables").objects;
+    this.signs = this.physics.add.staticGroup();
+    this.levers = this.physics.add.staticGroup();
+    this.blockades = this.physics.add.staticGroup();
+    interactableObjects.forEach(obj => {
+        const hitbox = this.physics.add.staticImage(obj.x * 2, obj.y * 2, 'kenny_tiles')
             .setOrigin(0, 1)
-            .setDisplaySize(sign.width, sign.height)
-            .setVisible(false); // invisible
-        if (sign.properties) {                                                              // If the sign has a text value, store it w/ the hitbox to grab in showSignText
-            sign.properties.forEach(p => {
+            .setScale(2)       
+            .refreshBody()     
+            .setDepth(5);
+        if (obj.gid) {
+            hitbox.setVisible(true);
+            hitbox.setFrame(obj.gid - 1);
+            console.log(`Creating interactable "${hitbox.Type}" with frame ${obj.gid - 1}`);
+        } else {
+            hitbox.setVisible(false);
+        }
+        if (obj.properties) {
+            obj.properties.forEach(p => {
                 hitbox[p.name] = p.value;
             });
         }
+        if (hitbox.Type === 'Sign') {
+            this.signs.add(hitbox);
+        } else if (hitbox.Type === 'Lever') {
+            this.levers.add(hitbox);
+        } else if (hitbox.Type === 'Blockade') {
+            this.blockades.add(hitbox);
+        }
     });
-    this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);       // Create physics overlap between player and the signs that call showSignText on overlap.
+    this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);
+    this.physics.add.overlap(this.player, this.levers, this.tryPullLever, null, this);
+    this.physics.add.collider(this.player, this.blockades);
+}
+
+    // Lever Implementation
+tryPullLever(player, lever) {
+    if (Phaser.Input.Keyboard.JustDown(this.tKey)) {
+        console.log(`Lever pulled: ${lever.LeverID}`);
+        const targets = this.blockades.getChildren().filter(blockade => blockade.BlockadeID === lever.LeverID);
+        lever.setFrame(66);
+        targets.forEach(blockade => {
+            blockade.destroy();
+            this.blockades.remove(blockade, true, true);
+        });
+    }
 }
 
     // Called when player is in overlap with a sign/text object from the objectlayer
@@ -181,7 +215,9 @@ dialogueBorderUpdate(){
 
     // One Way Pass Filter For Platforms
 oneWayPlatformCollide(player, tile) {
-    return player.body.velocity.y >= 1;
+    if(!tile.properties.border){
+        return player.body.velocity.y >= 1;
+    }
 }
 
     // Player 'death' Restart Function
@@ -204,7 +240,6 @@ handleDeadlyTiles(player, tile) {
         
     }
 }
-
 
     // Coin Collection Animation + Tracking
 collectCoin(player, tile) {
