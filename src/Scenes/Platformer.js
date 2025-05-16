@@ -17,12 +17,16 @@ create() {
     this.tTold = false;
     this.textSound = this.sound.add("dialogue")
     this.boomSound = this.sound.add("boom");
+    this.leverSound = this.sound.add("leverPull");
     this.spawnpointX = this.game.config.width / 19;
     this.spawnpointY = this.game.config.height / 1.4;
     this.lives = 3;
     this.isDying = false;
     this.gameOver = false;
     this.gameComplete = false;
+    this.leverFrameIndex = 64;
+    this.currentRegion = 1; // Start in region 1
+    this.regionWidth = 1440;
 
     // Create tilemap and layers
     this.map = this.make.tilemap({ key: "platformer-level-1" });
@@ -86,11 +90,12 @@ create() {
     this.physics.add.collider(this.enemies, this.player, this.handleDeadlyTiles, null, this);
 
     // Cam
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     this.cameras.main.setZoom(1);
     this.cameras.main.roundPixels = true;
     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     this.cameras.main.setDeadzone(100, 100); 
+    this.cameras.main.setBounds(0, 0, 1440, 900); // Example: only the first section
+
 
     // Colliders
     this.physics.add.collider(this.player, this.groundLayer, this.handleDeadlyTiles, this.oneWayPlatformCollide, this);
@@ -112,9 +117,9 @@ create() {
     
     // Text
     // Stat Texts
-    this.scoreText = this.add.text(16, 16, 'Score: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#000000'})
+    this.scoreText = this.add.text(16, 16, 'Score: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FFD700'})
     .setScrollFactor(0);
-    this.liveText = this.add.text(16, 40, 'Lives: 3', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#000000'})
+    this.liveText = this.add.text(16, 40, 'Lives: 3', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FF746C'})
     .setScrollFactor(0);
 
     // Dialogue Frame
@@ -143,15 +148,14 @@ create() {
     this.levers = this.physics.add.staticGroup();
     this.blockades = this.physics.add.staticGroup();
     interactableObjects.forEach(obj => {
-        const hitbox = this.physics.add.staticImage(obj.x * 2, obj.y * 2, 'kenny_tiles')
+        const hitbox = this.physics.add.staticImage(obj.x * 2, obj.y * 2, 'kenny_tiles')        // Create hitbox object for object layer items
             .setOrigin(0, 1)
             .setScale(2)       
             .refreshBody()     
             .setDepth(5);
-        if (obj.gid) {
+        if (obj.gid) {                                                                          // If object uses sprite, use it-- else make the hitbox invisible
             hitbox.setVisible(true);
             hitbox.setFrame(obj.gid - 1);
-            console.log(`Creating interactable "${hitbox.Type}" with frame ${obj.gid - 1}`);
         } else {
             hitbox.setVisible(false);
         }
@@ -162,13 +166,40 @@ create() {
         }
         if (hitbox.Type === 'Sign') {
             this.signs.add(hitbox);
+        this.walking = this.add.particles(obj.x*2+15, obj.y*2-30, "kenny-particles", {          // Particles to indicate interactibility
+            frame: ['star_03.png', 'star_02.png'],
+            random: true,
+            scale: {start: 0.03, end: 0.1},
+            maxAliveParticles: 8,
+            lifespan: 500,
+            gravityY: 400,
+            angle: { min: 0, max: 360 },
+            speed: { min: 30, max: 100 },
+            alpha: {start: 1, end: 0.1}, 
+            blendMode: Phaser.BlendModes.ADD
+        });
+        this.walking.setDepth(100);
         } else if (hitbox.Type === 'Lever') {
             this.levers.add(hitbox);
-        } else if (hitbox.Type === 'Blockade') {
+        this.walking = this.add.particles(obj.x*2+15, obj.y*2-30, "kenny-particles", {          // Particles to indicate interactibility
+            frame: ['star_03.png', 'star_02.png'],
+            random: true,
+            scale: {start: 0.03, end: 0.1},
+            maxAliveParticles: 8,
+            lifespan: 500,
+            gravityY: 200,
+            angle: { min: 0, max: 360 },
+            speed: { min: 30, max: 100 },
+            alpha: {start: 1, end: 0.1}, 
+            tint: 0x5C4033,
+            blendMode: Phaser.BlendModes.ADD
+        });
+        this.walking.setDepth(100);                                                            
+        } else if (hitbox.Type === 'Blockade') {                                              // Blockades don't emit particles
             this.blockades.add(hitbox);
         }
     });
-    this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);
+    this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);         // Collision for objects
     this.physics.add.overlap(this.player, this.levers, this.tryPullLever, null, this);
     this.physics.add.collider(this.player, this.blockades);
 }
@@ -176,13 +207,20 @@ create() {
     // Lever Implementation
 tryPullLever(player, lever) {
     if (Phaser.Input.Keyboard.JustDown(this.tKey)) {
-        console.log(`Lever pulled: ${lever.LeverID}`);
+        console.log(`Lever pulled: ${lever.LeverID}`);                                        // for each blockade that matches the leverID, destroy it. Change frame of lever. Make lever frame change infinite because someone will probably try pressing it multiple times
         const targets = this.blockades.getChildren().filter(blockade => blockade.BlockadeID === lever.LeverID);
-        lever.setFrame(66);
+        if (this.leverFrameIndex === 64){
+            lever.setFrame(66);
+            this.leverFrameIndex = 66;
+        }else{
+            lever.setFrame(64);
+            this.leverFrameIndex = 64;
+        }
         targets.forEach(blockade => {
             blockade.destroy();
             this.blockades.remove(blockade, true, true);
         });
+        this.leverSound.play();
     }
 }
 
@@ -292,8 +330,46 @@ fadeOut = (particle, duration, float) => {
     });
 }
 
+// Camera Behaviour
+panToRegion2() {
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);     // unlock camera for transition
+    this.cameras.main.stopFollow();                                                         // stop following player momentarily (not that the camera ever really follows the player with this configuration, but just in case!)
+    this.cameras.main.pan(                                                                  // pan camera to the center of the screen and player Y with a sin ease that last 1500ms, then set new bounds and start following again. Same for Return to region 1
+        this.regionWidth + this.regionWidth / 2, 
+        this.player.y,
+        1500,
+        'Sine.easeInOut',
+        true
+    );
+
+    this.time.delayedCall(1500, () => {
+        this.cameras.main.setBounds(this.regionWidth, 0, this.regionWidth, this.map.heightInPixels);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    });
+}
+
+panToRegion1() {
+    // Temporarily allow panning beyond current bounds
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+    this.cameras.main.stopFollow();
+
+    this.cameras.main.pan(
+        this.regionWidth / 2, // 720
+        this.player.y,
+        1500,
+        'Sine.easeInOut',
+        true
+    );
+
+    this.time.delayedCall(1500, () => {
+        this.cameras.main.setBounds(0, 0, this.regionWidth, this.map.heightInPixels);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    });
+}
+
     // Update Function
 update() {
+    console.log(this.player.body.x)
     if(!this.gameOver){
         this.enemyObjects.forEach(enemy => {
         enemy.update();
@@ -315,7 +391,16 @@ update() {
         } else {
         this.pressTPrompt.setVisible(false);
     }
-}
+
+    // Camera checks for special camera movement 
+    if (this.currentRegion === 1 && this.player.x > this.regionWidth) {
+        this.panToRegion2();
+        this.currentRegion = 2;
+    } else if (this.currentRegion === 2 && this.player.x < this.regionWidth) {
+        this.panToRegion1();
+        this.currentRegion = 1;
+        }
+    }
     // Lose Screen
     if(this.gameOver){
         this.player.destroy();

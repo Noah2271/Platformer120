@@ -17,6 +17,9 @@ export class Load extends Phaser.Scene {
             spacing: 0
         });
 
+        this.load.multiatlas("kenny-particles", "kenny-particles.json");
+
+
         // Load tilemap information
         this.load.image("tilemap_tiles", "tilemap_packed.png");                         
         this.load.image("background_tiles", "tilemap-backgrounds_packed.png");
@@ -43,6 +46,7 @@ export class Load extends Phaser.Scene {
         this.load.audio("coinCollect", "coinSound.wav");
         this.load.audio("dialogue", "dialogue.wav");
         this.load.audio("boom", "biboBoom.wav");
+        this.load.audio("leverPull", "lever.wav")
     }
 
     create() {

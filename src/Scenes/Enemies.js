@@ -1,3 +1,4 @@
+// done, not gonna make this too complicated. Maybe for final game
 export class EnemyControls {
     // Enemy Constructor
     constructor(scene, x, y, texture, groundLayer) {
