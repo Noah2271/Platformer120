@@ -14,6 +14,9 @@ create() {
     this.score = 0;
     this.signs = [];
     this.tKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.T);
+    this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S); 
+    this.eKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
     this.tTold = false;
     this.textSound = this.sound.add("dialogue")
     this.boomSound = this.sound.add("boom");
@@ -27,6 +30,10 @@ create() {
     this.leverFrameIndex = 64;
     this.currentRegion = 1; // Start in region 1
     this.regionWidth = 1440;
+    this.transition = false;
+    this.gameStarted = false;
+    this.BLT = this.MEATSUB = this.TENFOOTLONG = false;
+    this.reset = false;
 
     // Create tilemap and layers
     this.map = this.make.tilemap({ key: "platformer-level-1" });
@@ -86,6 +93,7 @@ create() {
     // Player creation and controls
     this.playerControls = new PlayerControls(this, this.cursors);
     this.player = this.playerControls.getSprite();
+    this.player.setVisible(false);
     this.player.setPosition(this.spawnpointX, this.spawnpointY);
     this.physics.add.collider(this.enemies, this.player, this.handleDeadlyTiles, null, this);
 
@@ -110,17 +118,40 @@ create() {
     }, this);
 
     // Special depths
-    this.signLayer.setDepth(13);
+    this.signLayer.setDepth(14);
     this.player.setDepth(12);
     this.decorationLayerTwo.setDepth(11);
-    this.decorationLayer.setDepth(10); 
+    this.decorationLayer.setDepth(13); 
     
     // Text
     // Stat Texts
     this.scoreText = this.add.text(16, 16, 'Score: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FFD700'})
-    .setScrollFactor(0);
+    .setScrollFactor(0)
+    .setVisible(false);
     this.liveText = this.add.text(16, 40, 'Lives: 3', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FF746C'})
-    .setScrollFactor(0);
+    .setScrollFactor(0)
+    .setVisible(false);
+    this.startText = this.add.text(16, 16, 'Sandwich Quest', {fontFamily: 'Silkscreen', fontSize: '50px', color: '#000000'});
+    this.startText1 = this.add.text(16, 66, 'Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man', {fontFamily: 'Silkscreen', fontSize: '20px', color: '#000000'});
+    this.startText2 = this.add.text(16, 90, 'Press S: Start', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#000000'});
+    this.startText3 = this.add.text(16, 120, 'Press E: View Obtained Sandwiches', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'});
+    this.sandwich1 = localStorage.getItem("sandwich1");                                                                                                                                                       // retrieve the scores for levels 
+    let sandwich2 = localStorage.getItem("sandwich2");
+    let sandwich3 = localStorage.getItem("sandwich2");
+    if(this.sandwich1 == 'true'){
+    this.startText4 = this.add.text(26, 150, '1. BLT : 1-20 COINS', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
+    .setVisible(false);
+    }else{
+    this.startText4 = this.add.text(26, 150, '1. Sandwich Unobtained', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
+    .setVisible(false);
+    }
+    this.startText5 = this.add.text(26, 180, '2. Sandwich Unobtained', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
+    .setVisible(false);
+    this.startText6 = this.add.text(26, 210, '3. Sandwich Unobtained', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
+    .setVisible(false);
+
+
+
 
     // Dialogue Frame
     this.box = this.add.graphics()
@@ -275,6 +306,7 @@ handleDeadlyTiles(player, tile) {
         this.liveText.setText('Lives: ' + this.lives);
         this.isDying = true;
         this.fadeOut(this.player, 500, -50);
+        console.log(this.lives)
         
     }
 }
@@ -322,6 +354,7 @@ fadeOut = (particle, duration, float) => {
             this.isDying = false;
             }
             if(this.lives === 0){
+            console.log('awawawa')
             this.player.alpha = 100;
             this.gameOver = true;
             }
@@ -343,6 +376,7 @@ panToRegion2() {
     );
 
     this.time.delayedCall(1500, () => {
+        this.transition = false;
         this.cameras.main.setBounds(this.regionWidth, 0, this.regionWidth, this.map.heightInPixels);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     });
@@ -362,19 +396,59 @@ panToRegion1() {
     );
 
     this.time.delayedCall(1500, () => {
+        this.transition = false;
         this.cameras.main.setBounds(0, 0, this.regionWidth, this.map.heightInPixels);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     });
 }
 
+reloadText() {
+    if(this.reset == true){
+    console.log('reloaded');
+    this.startText.setText('Sandwich Quest ');
+    this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man ');
+    this.startText2.setText('Press S: Start ');
+    this.startText3.setText('Press E: View Obtained Sandwiches ')
+    this.reset = false;
+    }else{
+    this.startText.setText('Sandwich Quest');
+    this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man');
+    this.startText2.setText('Press S: Start');
+    this.startText3.setText('Press E: View Obtained Sandwiches')
+    this.reset = true;
+    }
+}
     // Update Function
 update() {
-    console.log(this.player.body.x)
+    if (Phaser.Input.Keyboard.JustDown(this.cKey)) {                                        
+        this.reloadText();
+        }
     if(!this.gameOver){
         this.enemyObjects.forEach(enemy => {
         enemy.update();
     });
-    
+
+    if(!this.gameStarted){
+        if (Phaser.Input.Keyboard.JustDown(this.sKey)) {                                        
+            this.gameStarted = true;
+            this.startText.destroy();
+            this.startText1.destroy();
+            this.startText2.destroy();
+            this.startText3.destroy();
+            this.startText4.destroy();
+            this.startText5.destroy();
+            this.startText6.destroy();
+            this.scoreText.setVisible(true);
+            this.liveText.setVisible(true);
+            
+        }
+        if (Phaser.Input.Keyboard.JustDown(this.eKey)) {                                        
+            this.startText4.setVisible(true)
+            this.startText5.setVisible(true);
+            this.startText6.setVisible(true);
+        }
+    } else {
+    this.player.setVisible(true);
     this.playerControls.update();
         const touchingSign = this.physics.overlap(this.player, this.signs);
 
@@ -391,28 +465,33 @@ update() {
         } else {
         this.pressTPrompt.setVisible(false);
     }
-
+    if(!this.transition){
     // Camera checks for special camera movement 
     if (this.currentRegion === 1 && this.player.x > this.regionWidth) {
+        this.transition = true;
         this.panToRegion2();
         this.currentRegion = 2;
     } else if (this.currentRegion === 2 && this.player.x < this.regionWidth) {
+        this.transition = true;
         this.panToRegion1();
         this.currentRegion = 1;
+            }
         }
     }
-    // Lose Screen
-    if(this.gameOver){
+        }
+            // Lose Screen
+    if (this.gameOver){
+        console.log('awa')
         this.player.destroy();
         this.player.setVisible(false);
         this.dialogueBox.setText('You died, sandwichless.\nTotal Coins: ' + this.score + '\nPress R to Try Again.')
         this.dialogueBorderUpdate();
         this.dialogueBox.setVisible(true);
         this.box.setVisible(true);
+        localStorage.setItem("sandwich1", false);
         this.input.keyboard.on('keydown-R', () => {
         this.scene.restart();
     }, this);
-    }
-    
+            }
     }
 }

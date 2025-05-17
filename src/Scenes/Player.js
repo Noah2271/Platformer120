@@ -44,6 +44,7 @@ spawnDust(x, y) {
     dust.setBlendMode(Phaser.BlendModes.SCREEN);
     dust.setTint(0xCD853F);
     dust.play('runParticles');
+    dust.setDepth(12);
     this.fadeOut(dust, 500, 20);
 }
 
@@ -135,6 +136,7 @@ update() {
     if (p.body.blocked.down && Phaser.Input.Keyboard.JustDown(this.spaceKey) && this.JUMPCOUNT < 1) {
         const jumpParticles = this.scene.add.sprite(p.x, p.y, 'jumpParticles1');                // Jump Particle Creation
         jumpParticles.setScale(0.15);
+        jumpParticles.setDepth(12);
         jumpParticles.play('jumpParticles');
         this.fadeOut(jumpParticles, 500, 0);
         const Jump = this.Sounds[1];                                                            // Play Jump Sound
@@ -150,7 +152,8 @@ update() {
         diveSound.play();
         const divePoof = this.scene.add.sprite(p.x, p.y, 'diveParticles1');
         divePoof.setScale(0.2);
-        divePoof.setBlendMode(Phaser.BlendModes.SCREEN);     
+        divePoof.setBlendMode(Phaser.BlendModes.SCREEN);    
+        divePoof.setDepth(12); 
         divePoof.play('divePoof');                       
         this.fadeOut(divePoof, 1000, 30);
         p.setAccelerationX(0);
