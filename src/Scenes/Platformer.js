@@ -27,8 +27,9 @@ create() {
     this.textSound = this.sound.add("dialogue")
     this.boomSound = this.sound.add("boom");
     this.leverSound = this.sound.add("leverPull");
-    this.spawnpointX = this.game.config.width / 19;
-    this.spawnpointY = this.game.config.height / 1.4;
+    this.checkpointSound = this.sound.add("spawn");
+    this.spawnpointX = 1430*2 // this.game.config.width / 19;
+    this.spawnpointY =  143*2//this.game.config.height / 1.4;
     this.lives = 3;
     this.isDying = false;
     this.gameOver = false;
@@ -45,9 +46,10 @@ create() {
     // Create tilemap and layers
     this.map = this.make.tilemap({ key: "platformer-level-1" });
     this.tileset = this.map.addTilesetImage("kenny_tilemap_packed", "tilemap_tiles");
-    this.backgroundset = this.map.addTilesetImage("kenny_background", "background_tiles");                  
+    this.backgroundset = this.map.addTilesetImage("kenny_background", "background_tiles");              
     this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);                        // Fix Boundaries, previously sticking to default screen size
     this.parallaxLayerOne = this.map.createLayer("BackLayer", this.backgroundset, 0,0);
+     this.mountainLayer = this.map.createLayer("Mountain", this.tileset, 0,0);    
     this.groundLayerBacked = this.map.createLayer("Background-Ground", this.tileset, 0, 0);
     this.groundLayer = this.map.createLayer("Ground", this.tileset, 0, 0);
     this.decorationLayer = this.map.createLayer("Decoration", this.tileset, 0, 0);
@@ -63,12 +65,14 @@ create() {
     this.signLayer.setScale(2.0);
     this.parallaxLayerOne.setScale(2.0);
     this.impassibleLayer.setScale(2.0);
+    this.mountainLayer.setScale(2.0);
+
 
     // Parallax
     this.parallaxLayerOne.setScrollFactor(0.5); 
 
     // Enemies
-    this.enemySpawns = [[1000, 300]];                                                               
+    this.enemySpawns = [[1854*2, 146*2], [1878*2, 210*2], [1858*2, 266*2], [1000, 300], [1322*2, 262*2], [1142*2, 129*2], [1266*2, 168*2], [1750*2, 102*2], [1695*2, 170*2], [1738*2, 244*2], [1738*2, 328*2], [1717*2, 391*2]] ;                                                               
     this.enemies = this.physics.add.group();
     this.enemyObjects = [];
 
@@ -126,8 +130,8 @@ create() {
 
     // Special depths
     this.signLayer.setDepth(14);
-    this.player.setDepth(12);
-    this.decorationLayerTwo.setDepth(11);
+    this.player.setDepth(15);
+    this.decorationLayerTwo.setDepth(14);
     this.decorationLayer.setDepth(13); 
     
     // Text
@@ -136,9 +140,11 @@ create() {
     .setDepth(15);
     this.scoreText = this.add.text(16, 16, 'Coins: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FFD700'})
     .setScrollFactor(0)
+    .setDepth(999)
     .setVisible(false);
     this.liveText = this.add.text(16, 40, 'Lives: 3', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FF746C'})
     .setScrollFactor(0)
+    .setDepth(999)
     .setVisible(false);
     this.startText = this.add.text(16, 16, 'Sandwich Quest', {fontFamily: 'Silkscreen', fontSize: '50px', color: '#000000'});
     this.startText1 = this.add.text(16, 66, 'Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man', {fontFamily: 'Silkscreen', fontSize: '20px', color: '#000000'});
@@ -147,7 +153,7 @@ create() {
     this.sandwich1 = localStorage.getItem("sandwich1");                                                                                                                                                       // retrieve the scores for levels 
     let sandwich2 = localStorage.getItem("sandwich2");
     let sandwich3 = localStorage.getItem("sandwich2");
-        this.time.delayedCall(10, () => {
+        this.time.delayedCall(100, () => {
     if(this.sandwich1 == 'true'){
     this.startText4 = this.add.text(26, 150, '1. BLT : 1-20 COINS', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
     .setVisible(false);
@@ -160,9 +166,6 @@ create() {
     this.startText6 = this.add.text(26, 210, '3. Sandwich Unobtained', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
     .setVisible(false);
     });
-
-
-
 
     // Dialogue Frame
     this.box = this.add.graphics()
@@ -189,6 +192,7 @@ create() {
     this.signs = this.physics.add.staticGroup();
     this.levers = this.physics.add.staticGroup();
     this.blockades = this.physics.add.staticGroup();
+    this.flags = this.physics.add.staticGroup();
     interactableObjects.forEach(obj => {
         const hitbox = this.physics.add.staticImage(obj.x * 2, obj.y * 2, 'kenny_tiles')        // Create hitbox object for object layer items
             .setOrigin(0, 1)
@@ -205,6 +209,21 @@ create() {
             obj.properties.forEach(p => {
                 hitbox[p.name] = p.value;
             });
+        }
+        if(hitbox.Type === 'Flag'){
+            this.flags.add(hitbox);
+        this.walking = this.add.particles(obj.x*2+15, obj.y*2-30, "kenny-particles", {          // Particles to indicate interactibility
+            frame: ['star_03.png', 'star_02.png'],
+            random: true,
+            scale: {start: 0.03, end: 0.1},
+            maxAliveParticles: 8,
+            lifespan: 500,
+            gravityY: 400,
+            angle: { min: 0, max: 360 },
+            speed: { min: 30, max: 100 },
+            alpha: {start: 1, end: 0.1}, 
+            blendMode: Phaser.BlendModes.ADD
+        });
         }
         if (hitbox.Type === 'Sign') {
             this.signs.add(hitbox);
@@ -244,19 +263,41 @@ create() {
     this.physics.add.overlap(this.player, this.signs, this.showSignText, null, this);         // Collision for objects
     this.physics.add.overlap(this.player, this.levers, this.tryPullLever, null, this);
     this.physics.add.collider(this.player, this.blockades);
+    this.physics.add.overlap(this.player, this.flags, this.Checkpoint, null, this);
 }
 
+    // Checkpoint implementation
+Checkpoint(player, flag){
+    if(Phaser.Input.Keyboard.JustDown(this.tKey)){
+        console.log(`Spawn Set: ${flag.spawnX} ${flag.spawnY}`);
+        this.spawnpointX = flag.spawnX*2;
+        this.spawnpointY = flag.spawnY*1.5;
+        const spawnPoint = this.add.sprite(flag.x+10, flag.y-40, 'spawnPoint');
+        spawnPoint.setDepth(99);
+        spawnPoint.setScale(0.2);
+        spawnPoint.setBlendMode(Phaser.BlendModes.SCREEN);
+        spawnPoint.play('spawnPoint');
+        this.checkpointSound.setVolume(0.6);
+        this.checkpointSound.play();
+        if(flag.giveLife === true){
+            this.lives += 1;
+            flag.giveLife = false;
+            this.liveText.setText('Lives: ' + this.lives);
+        }
+    }
+}
     // Lever Implementation
 tryPullLever(player, lever) {
     if (Phaser.Input.Keyboard.JustDown(this.tKey)) {
         console.log(`Lever pulled: ${lever.LeverID}`);                                        // for each blockade that matches the leverID, destroy it. Change frame of lever. Make lever frame change infinite because someone will probably try pressing it multiple times
         const targets = this.blockades.getChildren().filter(blockade => blockade.BlockadeID === lever.LeverID);
-        if (this.leverFrameIndex === 64){
+        console.log(lever.flip);
+        if (lever.flip == true){
             lever.setFrame(66);
-            this.leverFrameIndex = 66;
+            lever.flip = false;
         }else{
             lever.setFrame(64);
-            this.leverFrameIndex = 64;
+            lever.flip = true;
         }
         targets.forEach(blockade => {
             blockade.destroy();
@@ -413,6 +454,42 @@ panToRegion1() {
     });
 }
 
+panToRegion3() {
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+    this.cameras.main.stopFollow();
+    this.cameras.main.pan(
+        this.regionWidth * 2 + this.regionWidth / 2, // center of region 3
+        this.player.y,
+        1500,
+        'Sine.easeInOut',
+        true
+    );
+
+    this.time.delayedCall(1500, () => {
+        this.transition = false;
+        this.cameras.main.setBounds(this.regionWidth * 2, 0, this.regionWidth, this.map.heightInPixels);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    });
+}
+
+panToRegion4() {
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+    this.cameras.main.stopFollow();
+    this.cameras.main.pan(
+        this.regionWidth * 3 + this.regionWidth / 2, // center of region 4
+        this.player.y,
+        1500,
+        'Sine.easeInOut',
+        true
+    );
+
+    this.time.delayedCall(1500, () => {
+        this.transition = false;
+        this.cameras.main.setBounds(this.regionWidth * 3, 0, this.regionWidth, this.map.heightInPixels);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    });
+}
+
 reloadText() {
     console.log('reloaded');
     if(!this.gameStarted){
@@ -480,7 +557,7 @@ update() {
     } else {
     this.player.setVisible(true);
     this.playerControls.update();
-        const touchingSign = this.physics.overlap(this.player, this.signs);
+    const touchingSign = this.physics.overlap(this.player, this.signs);
 
     // Hide text, maybe change from "Sign" vars later since signs won't be the only thing that cause text, maybe.
     if (!touchingSign) { 
@@ -495,16 +572,38 @@ update() {
         } else {
         this.pressTPrompt.setVisible(false);
     }
-    if(!this.transition){
-    // Camera checks for special camera movement 
-    if (this.currentRegion === 1 && this.player.x > this.regionWidth) {
-        this.transition = true;
-        this.panToRegion2();
-        this.currentRegion = 2;
-    } else if (this.currentRegion === 2 && this.player.x < this.regionWidth) {
-        this.transition = true;
-        this.panToRegion1();
-        this.currentRegion = 1;
+        if (!this.transition) {
+            if (this.currentRegion === 1 && this.player.x > this.regionWidth) {
+                this.transition = true;
+                this.panToRegion2();
+                this.currentRegion = 2;
+
+            } else if (this.currentRegion === 2) {
+                if (this.player.x < this.regionWidth) {
+                    this.transition = true;
+                    this.panToRegion1();
+                    this.currentRegion = 1;
+                } else if (this.player.x > this.regionWidth * 2) {
+                    this.transition = true;
+                    this.panToRegion3();
+                    this.currentRegion = 3;
+                }
+
+            } else if (this.currentRegion === 3) {
+                if (this.player.x < this.regionWidth * 2) {
+                    this.transition = true;
+                    this.panToRegion2();
+                    this.currentRegion = 2;
+                } else if (this.player.x > this.regionWidth * 3) {
+                    this.transition = true;
+                    this.panToRegion4();
+                    this.currentRegion = 4;
+                }
+
+            } else if (this.currentRegion === 4 && this.player.x < this.regionWidth * 3) {
+                this.transition = true;
+                this.panToRegion3();
+                this.currentRegion = 3;
             }
         }
     }
@@ -520,6 +619,7 @@ update() {
         this.box.setVisible(true);
         localStorage.setItem("sandwich1", true);
         this.input.keyboard.on('keydown-R', () => {
+        this.backgroundMusic.stop();
         this.scene.restart();
     }, this);
             }

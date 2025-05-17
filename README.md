@@ -18,7 +18,7 @@ Game End : X
 Game Restart : X
 
 Parallax Background : X +19
-Complex Camera : W.I.P (27.5 Tentatively, pan camera all the way ONLY on the other side of the level).
+Complex Camera : W.I.P (27.5 Tentatively, pan camera all the way ONLY on the other side of the level). X
 Double Jumping / Wall Jumping : X +19.5
 Alternate Player Movement : No
 Juicy Juice: Maybe! [26]

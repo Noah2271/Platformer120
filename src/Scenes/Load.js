@@ -49,6 +49,12 @@ export class Load extends Phaser.Scene {
         this.load.audio("leverPull", "lever.wav");
         this.load.audio("ding", "UIblip.wav");
         this.load.audio("bgm", "music.mp3");
+        this.load.audio("spawn", "spawn.wav");
+        this.load.image("checkpoint1", "circle_01.png");
+        this.load.image("checkpoint2", "circle_02.png");
+        this.load.image("checkpoint3", "circle_03.png");
+        this.load.image("checkpoint4", "circle_04.png");
+        this.load.image("checkpoint5", "circle_05.png");
     }
 
     create() {
@@ -59,6 +65,20 @@ export class Load extends Phaser.Scene {
                 {key: "biboBoomParticles1"},
                 {key: "biboBoomParticles2"},
                 {key: "biboBoomParticles3"},
+            ],
+            frameRate: 10,
+            repeat: 1,
+            hideOnComplete: true
+        });
+
+        this.anims.create({
+            key: 'spawnPoint',
+            frames: [
+                {key: 'checkpoint1'},
+                {key: 'checkpoint2'},
+                {key: 'checkpoint3'},
+                {key: 'checkpoint4'},
+                {key: 'checkpoint5'},
             ],
             frameRate: 10,
             repeat: 1,
