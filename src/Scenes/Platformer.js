@@ -11,6 +11,12 @@ export class Platformer extends Phaser.Scene {
 
     }
 create() {
+    // BGM
+    this.backgroundMusic = this.sound.add('bgm', {
+    loop: true,
+    volume: 0.05 
+    });
+    this.backgroundMusic.play();
     this.score = 0;
     this.signs = [];
     this.tKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.T);
@@ -34,6 +40,7 @@ create() {
     this.gameStarted = false;
     this.BLT = this.MEATSUB = this.TENFOOTLONG = false;
     this.reset = false;
+    this.uiBlip = this.sound.add("ding");
 
     // Create tilemap and layers
     this.map = this.make.tilemap({ key: "platformer-level-1" });
@@ -124,8 +131,10 @@ create() {
     this.decorationLayer.setDepth(13); 
     
     // Text
-    // Stat Texts
-    this.scoreText = this.add.text(16, 16, 'Score: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FFD700'})
+    this.warning = this.add.text(10, 870, 'IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX', {fontFamily: 'Silkscreen', fontSize: '20px', color: '#FFFFFF'})
+    .setScrollFactor(0)
+    .setDepth(15);
+    this.scoreText = this.add.text(16, 16, 'Coins: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FFD700'})
     .setScrollFactor(0)
     .setVisible(false);
     this.liveText = this.add.text(16, 40, 'Lives: 3', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FF746C'})
@@ -138,6 +147,7 @@ create() {
     this.sandwich1 = localStorage.getItem("sandwich1");                                                                                                                                                       // retrieve the scores for levels 
     let sandwich2 = localStorage.getItem("sandwich2");
     let sandwich3 = localStorage.getItem("sandwich2");
+        this.time.delayedCall(10, () => {
     if(this.sandwich1 == 'true'){
     this.startText4 = this.add.text(26, 150, '1. BLT : 1-20 COINS', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
     .setVisible(false);
@@ -149,6 +159,7 @@ create() {
     .setVisible(false);
     this.startText6 = this.add.text(26, 210, '3. Sandwich Unobtained', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
     .setVisible(false);
+    });
 
 
 
@@ -330,7 +341,7 @@ collectCoin(player, tile) {
                                                                                             // Handle Like a particle from Player.js
         this.fadeOut(coinSprite, 500, 20);
         this.score += 1;                                                                    // increment Score, play sound
-        this.scoreText.setText('Coin: ' + this.score);
+        this.scoreText.setText('Coins: ' + this.score);
         this.coinSound.setVolume(0.4);
         this.coinSound.play();
     }
@@ -403,24 +414,41 @@ panToRegion1() {
 }
 
 reloadText() {
-    if(this.reset == true){
     console.log('reloaded');
-    this.startText.setText('Sandwich Quest ');
-    this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man ');
-    this.startText2.setText('Press S: Start ');
-    this.startText3.setText('Press E: View Obtained Sandwiches ')
-    this.reset = false;
-    }else{
-    this.startText.setText('Sandwich Quest');
-    this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man');
-    this.startText2.setText('Press S: Start');
-    this.startText3.setText('Press E: View Obtained Sandwiches')
-    this.reset = true;
+    if(!this.gameStarted){
+        if(this.reset == true){
+            this.startText.setText('Sandwich Quest ');
+            this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man ');
+            this.startText2.setText('Press S: Start ');
+            this.startText3.setText('Press E: View Obtained Sandwiches ');
+            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX ');
+            this.reset = false;
+        }else{
+            this.startText.setText('Sandwich Quest');
+            this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man');
+            this.startText2.setText('Press S: Start');
+            this.startText3.setText('Press E: View Obtained Sandwiches');
+            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX');
+            this.reset = true;
+        }
+    } else {
+        if(this.reset == true){
+            this.pressTPrompt.setText('PRESS [T] TO READ SIGNS!');
+            this.liveText.setText('LIVES: ' + this.lives);
+            this.scoreText.setText('COINS: ' + this.score);
+            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX ');
+        }else{
+            this.pressTPrompt.setText('PRESS [T] TO READ SIGNS! ');
+            this.liveText.setText('LIVES: ' + this.lives + ' ');
+            this.scoreText.setText('COINS: ' + this.score+ ' ');
+            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX ');
+            }   
+        }
     }
-}
     // Update Function
 update() {
-    if (Phaser.Input.Keyboard.JustDown(this.cKey)) {                                        
+    if (Phaser.Input.Keyboard.JustDown(this.cKey)) {         
+        this.uiBlip.play();                             
         this.reloadText();
         }
     if(!this.gameOver){
@@ -429,7 +457,8 @@ update() {
     });
 
     if(!this.gameStarted){
-        if (Phaser.Input.Keyboard.JustDown(this.sKey)) {                                        
+        if (Phaser.Input.Keyboard.JustDown(this.sKey)) {
+            this.uiBlip.play();                                         
             this.gameStarted = true;
             this.startText.destroy();
             this.startText1.destroy();
@@ -442,7 +471,8 @@ update() {
             this.liveText.setVisible(true);
             
         }
-        if (Phaser.Input.Keyboard.JustDown(this.eKey)) {                                        
+        if (Phaser.Input.Keyboard.JustDown(this.eKey)) {   
+            this.uiBlip.play();                                      
             this.startText4.setVisible(true)
             this.startText5.setVisible(true);
             this.startText6.setVisible(true);
@@ -488,7 +518,7 @@ update() {
         this.dialogueBorderUpdate();
         this.dialogueBox.setVisible(true);
         this.box.setVisible(true);
-        localStorage.setItem("sandwich1", false);
+        localStorage.setItem("sandwich1", true);
         this.input.keyboard.on('keydown-R', () => {
         this.scene.restart();
     }, this);
