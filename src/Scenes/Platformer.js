@@ -28,8 +28,8 @@ create() {
     this.boomSound = this.sound.add("boom");
     this.leverSound = this.sound.add("leverPull");
     this.checkpointSound = this.sound.add("spawn");
-    this.spawnpointX = 1430*2 // this.game.config.width / 19;
-    this.spawnpointY =  143*2//this.game.config.height / 1.4;
+    this.spawnpointX = this.game.config.width / 19;
+    this.spawnpointY = this.game.config.height / 1.4;
     this.lives = 3;
     this.isDying = false;
     this.gameOver = false;
