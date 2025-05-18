@@ -55,6 +55,8 @@ export class Load extends Phaser.Scene {
         this.load.image("checkpoint3", "circle_03.png");
         this.load.image("checkpoint4", "circle_04.png");
         this.load.image("checkpoint5", "circle_05.png");
+        this.load.audio("speech", "speech.wav");
+        this.load.audio("win", "win.mp3");
     }
 
     create() {
@@ -104,6 +106,19 @@ export class Load extends Phaser.Scene {
                 prefix: "tile_",
                 start: 18,
                 end: 19,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'sandwichMan',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 2,
+                end: 2,
                 suffix: ".png",
                 zeroPad: 4
             }),
