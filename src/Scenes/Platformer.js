@@ -142,15 +142,15 @@ create() {
     //}, this);
 
     // Depth Set for Tiles
-    this.signLayer.setDepth(14);
+    this.signLayer.setDepth(17);
     this.player.setDepth(15);
-    this.decorationLayerTwo.setDepth(14);
-    this.decorationLayer.setDepth(13); 
+    this.decorationLayerTwo.setDepth(13);
+    this.decorationLayer.setDepth(16); 
     
     // Text
     this.warning = this.add.text(10, 870, 'IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX', {fontFamily: 'Silkscreen', fontSize: '20px', color: '#FFFFFF'})
         .setScrollFactor(0)
-        .setDepth(15);
+        .setDepth(999);
     this.scoreText = this.add.text(16, 16, 'Coins: 0', {fontFamily: 'Silkscreen', fontSize: '24px', color: '#FFD700'})
         .setScrollFactor(0)
         .setDepth(999)
@@ -177,7 +177,6 @@ create() {
     this.sandwich2 = localStorage.getItem("sandwich2");
     this.sandwich3 = localStorage.getItem("sandwich3");
     this.sandwich4 = localStorage.getItem("sandwich4");
-        this.time.delayedCall(100, () => {
     if(this.sandwich1 == 'true'){
         this.startText4 = this.add.text(26, 150, '1. BLT : 1-30 COINS', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
         .setVisible(false);
@@ -206,7 +205,6 @@ create() {
         this.startText7 = this.add.text(26, 240, '4. Sandwich Unobtained [HINT: No money]', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'})
         .setVisible(false);
     }
-    });
 
     // Dialogue Frame
     this.box = this.add.graphics()
@@ -323,7 +321,7 @@ create() {
     this.physics.add.collider(this.player, this.blockades);
     this.physics.add.overlap(this.player, this.flags, this.Checkpoint, null, this);
     this.physics.add.overlap(this.player, this.NPCs, this.endState, null, this);
-    this.physics.world.TILE_BIAS = 50;                                                          // Mitigate noclipping - Kind of messes with the pass under collision. Anything higher will break enemy checks. Clipping mitigated though.
+    this.physics.world.TILE_BIAS = 22;                                                          // Mitigate noclipping - Kind of messes with the pass under collision. Anything higher will break enemy checks. Clipping mitigated though.
 }
 
     // Checkpoint implementation
@@ -628,7 +626,7 @@ panToRegion5() {
     });
 }
 
-// reload text because SOMETIMES the game starts before text assets are completely loaded in. Spammable until it works.
+// reload text because SOMETIMES the game starts before text assets are completely loaded in. 
 reloadText() {
     console.log('reloaded');
     if(!this.gameStarted){
@@ -637,14 +635,54 @@ reloadText() {
             this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man ');
             this.startText2.setText('Press S: Start ');
             this.startText3.setText('Press E: View Obtained Sandwiches ');
-            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX ');
+            this.warning.setText('CONTROLS: ARROWS + SPACEBAR, T TO INTERACT WITH SPARKLY OBJECTS ');
+        if(this.sandwich1 == 'true'){
+        this.startText4.setText('1. BLT : 1-30 COINS ');
+        }else{
+            this.startText4.setText('1. Sandwich Unobtained ')
+        }
+        if(this.sandwich2 == 'true'){
+            this.startText5.setText('2. MEATBALL SUB: 31-65 COINS ')
+        }else{
+            this.startText5.setText('2. Sandwich Unobtained ')
+        }
+        if(this.sandwich3 == 'true'){
+            this.startText6.setText('3. TEN FOOT LONG SUB: ALL THE COINS ')
+        }else{
+            this.startText6.setText('3. Sandwich Unobtained [HINT: Be rich] ')
+        }
+        if(this.sandwich4 == 'true'){
+            this.startText7.setText('4. NOTHING?: NO COINS ')
+        }else{
+            this.startText7.setText('4. Sandwich Unobtained [HINT: No money] ')
+        }
             this.reset = false;
         }else{
             this.startText.setText('Sandwich Quest');
             this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man');
             this.startText2.setText('Press S: Start');
             this.startText3.setText('Press E: View Obtained Sandwiches');
-            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX');
+            this.warning.setText('CONTROLS: ARROWS + SPACEBAR, T TO INTERACT WITH SPARKLY OBJECTS');
+                if(this.sandwich1 == 'true'){
+        this.startText4.setText('1. BLT : 1-30 COINS');
+        }else{
+            this.startText4.setText('1. Sandwich Unobtained')
+        }
+        if(this.sandwich2 == 'true'){
+            this.startText5.setText('2. MEATBALL SUB: 31-65 COINS')
+        }else{
+            this.startText5.setText('2. Sandwich Unobtained')
+        }
+        if(this.sandwich3 == 'true'){
+            this.startText6.setText('3. TEN FOOT LONG SUB: ALL THE COINS')
+        }else{
+            this.startText6.setText('3. Sandwich Unobtained [HINT: Be rich]')
+        }
+        if(this.sandwich4 == 'true'){
+            this.startText7.setText('4. NOTHING?: NO COINS')
+        }else{
+            this.startText7.setText('4. Sandwich Unobtained [HINT: No money]')
+        }
             this.reset = true;
         }
     } else {
@@ -654,19 +692,20 @@ reloadText() {
             this.scoreText.setText('COINS: ' + this.score);
             this.liveTextShadow.setText('LIVES: ' + this.lives);
             this.scoreTextShadow.setText('COINS: ' + this.score);
-            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX ');
+            this.warning.setText('CONTROLS: ARROWS + SPACEBAR, T TO INTERACT WITH SPARKLY OBJECTS');
         }else{
             this.pressTPrompt.setText('PRESS [T] TO READ SIGNS! ');
             this.liveText.setText('LIVES: ' + this.lives + ' ');
             this.scoreText.setText('COINS: ' + this.score+ ' ');
             this.liveTextShadow.setText('LIVES: ' + this.lives+ ' ');
             this.scoreTextShadow.setText('COINS: ' + this.score+ ' ');
-            this.warning.setText('IF TEXT NON-PIXELATED OR TORN, SPAM C TO FIX ');
+            this.warning.setText('CONTROLS: ARROWS + SPACEBAR, T TO INTERACT WITH SPARKLY OBJECTS ');
             }   
         }
     }
 // Update Loop
 update() {
+    this.reloadText();
     this.enemyObjects.forEach(enemy => {
         enemy.update();
     });

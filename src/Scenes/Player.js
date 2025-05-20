@@ -44,7 +44,7 @@ spawnDust(x, y) {
     dust.setBlendMode(Phaser.BlendModes.SCREEN);
     dust.setTint(0xCD853F);
     dust.play('runParticles');
-    dust.setDepth(12);
+    dust.setDepth(15);
     this.fadeOut(dust, 500, 20);
 }
 
@@ -85,6 +85,9 @@ update() {
         // Set shorthand p to player
     const p = this.player;
         // Player Left and Right Movement Implementation
+    if(p.body.velocity.y > 800){
+        p.setVelocityY(800);
+    }
     if(p.body.blocked.left || p.body.blocked.right){
         p.anims.play('idle');
     }
@@ -136,7 +139,7 @@ update() {
     if (p.body.blocked.down && Phaser.Input.Keyboard.JustDown(this.spaceKey) && this.JUMPCOUNT < 1) {
         const jumpParticles = this.scene.add.sprite(p.x, p.y, 'jumpParticles1');                // Jump Particle Creation
         jumpParticles.setScale(0.15);
-        jumpParticles.setDepth(12);
+        jumpParticles.setDepth(15);
         jumpParticles.play('jumpParticles');
         this.fadeOut(jumpParticles, 500, 0);
         const Jump = this.Sounds[1];                                                            // Play Jump Sound
@@ -153,7 +156,7 @@ update() {
         const divePoof = this.scene.add.sprite(p.x, p.y, 'diveParticles1');
         divePoof.setScale(0.2);
         divePoof.setBlendMode(Phaser.BlendModes.SCREEN);    
-        divePoof.setDepth(12); 
+        divePoof.setDepth(15); 
         divePoof.play('divePoof');                       
         this.fadeOut(divePoof, 1000, 30);
         p.setAccelerationX(0);

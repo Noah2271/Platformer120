@@ -8,7 +8,7 @@ Collectible Items : X
 End of Level Condition : X
 Level Size : X
 Scrolling and Camera : X
-Particle Juice : - Particle emitters done, will just keep the movement juice to animations-- it looks better. Maybe try to change their colors? Haven't figured that out.
+Particle Juice : - Particle emitters for interactables, will just keep the movement juice to animations-- it looks better. Maybe try to change their colors? Haven't figured that out.
 Audio Juice : X
 
 Scenes : X
