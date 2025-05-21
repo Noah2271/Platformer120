@@ -37,7 +37,7 @@ export class PlayerControls {
 getSprite() {
     return this.player;
 }
-        // Spawn Walking Particles Function
+        // Spawn Walking Particles 
 spawnDust(x, y) {
     const dust = this.scene.add.sprite(x, y, 'runParticles1');
     dust.setScale(0.1);
