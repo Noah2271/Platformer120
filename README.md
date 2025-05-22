@@ -1,7 +1,8 @@
 ** Platformer 120 **
 Assigment for CMPM 120
 
-CHECKLIST\n
+CHECKLIST
+
 Player Avatar Movement : X
 Ground and Platforms : X
 Collectible Items : X
