@@ -3,20 +3,31 @@ Assigment for CMPM 120
 
 CHECKLIST
 
-Player Avatar Movement : X
-Ground and Platforms : X
-Collectible Items : X
-End of Level Condition : X
-Level Size : X
-Scrolling and Camera : X
-Particle Juice : - Particle emitters for interactables, will just keep the movement juice to animations-- it looks better. Maybe try to change their colors? Haven't figured that out.
-Audio Juice : X
+Player Avatar Movement : DONE
 
-Scenes : X
-Input : X
-Art Assets : X
-Game End : X
-Game Restart : X
+Ground and Platforms : DONE
+
+Collectible Items : DONE
+
+End of Level Condition : DONE
+
+Level Size : DONE
+
+Scrolling and Camera : DONE
+
+Particle Juice : - DONE: Particle emitters for interactables, will just keep the movement juice to animations-- it looks better. Maybe try to change their colors? Haven't figured that out.
+
+Audio Juice : DONE
+
+Scenes : DONE
+
+Input : DONE
+
+Art Assets : DONE
+
+Game End : DONE
+
+Game Restart : DONE
 
 Parallax Background : DONE
 Complex Camera : DONE (Background Parallax layer moves slower when the camera pans using scroll factors, located in Platformer.js)
