@@ -170,7 +170,7 @@ create() {
     
     // Sandwich (challenges) Tracking Text
     this.startText = this.add.text(16, 16, 'Sandwich Quest', {fontFamily: 'Silkscreen', fontSize: '50px', color: '#000000'});
-    this.startText1 = this.add.text(16, 66, 'Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man', {fontFamily: 'Silkscreen', fontSize: '20px', color: '#000000'});
+    this.startText1 = this.add.text(16, 66, 'Go on a Journey as \'Bert\', collect coins, and purchase a sandwich from the fabled Sandwich Man', {fontFamily: 'Silkscreen', fontSize: '20px', color: '#000000'});
     this.startText2 = this.add.text(16, 90, 'Press S: Start', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#000000'});
     this.startText3 = this.add.text(16, 120, 'Press E: View Obtained Sandwiches', {fontFamily: 'Silkscreen', fontSize: '25px', color: '#00000'});
     this.sandwich1 = localStorage.getItem("sandwich1");                                       // Sandwiches based on local storage booleans set by coin amount when interacting with the sandwich man. Saves in localstorage so you can admire all your sandwiches                                                                                                                                                     
@@ -398,25 +398,25 @@ endState(player, NPC) {
             this.winSound.play();
             if (this.score == 0) {
                 console.log("N");
-                this.dialogueBox.setText('I am afraid you cannot afford a sandwich...\n[YOU OBTAINED... NOTHING] [PRESS R TO RETURN TO MAIN MENU]');
+                this.dialogueBox.setText('SANDWICH MAN: I am afraid you cannot afford a sandwich...\n[YOU OBTAINED... NOTHING] [PRESS R TO RETURN TO MAIN MENU]');
                 this.dialogueBorderUpdate();
                 localStorage.setItem("sandwich4", true);
             }
             if (this.score != 0 && this.score <= 30){
                 console.log('BLT');
-                this.dialogueBox.setText('I can give you a BLT.\n[YOU OBTAINED A BLT] [PRESS R TO RETURN TO MAIN MENU]');
+                this.dialogueBox.setText('SANDWICH MAN: I can give you a BLT.\n[YOU OBTAINED A BLT] [PRESS R TO RETURN TO MAIN MENU]');
                 this.dialogueBorderUpdate();
                 localStorage.setItem("sandwich1", true);
             }
             if (this.score > 30 && this.score <= 65){
                 console.log('MBS');
-                this.dialogueBox.setText('I can give you a meatball sub.\n[YOU OBTAINED A MEATBALL SUB] [PRESS R TO RETURN TO MAIN MENU]');
+                this.dialogueBox.setText('SANDWICH MAN: I can give you a meatball sub.\n[YOU OBTAINED A MEATBALL SUB] [PRESS R TO RETURN TO MAIN MENU]');
                 this.dialogueBorderUpdate();
                 localStorage.setItem("sandwich2", true);
             }
             if (this.score == 66){
                 console.log('TFLS');
-                this.dialogueBox.setText('Wow you are rich, kid. Here is a ten foot long.\n[YOU OBTAINED TEN FOOT LONG SUB] [PRESS R TO RETURN TO MAIN MENU]');
+                this.dialogueBox.setText('SANDWICH MAN: Wow you are rich, kid. Here is a ten foot long.\n[YOU OBTAINED TEN FOOT LONG SUB] [PRESS R TO RETURN TO MAIN MENU]');
                 this.dialogueBorderUpdate();
                 localStorage.setItem("sandwich3", true);
                 }
@@ -632,7 +632,7 @@ reloadText() {
     if(!this.gameStarted){
         if(this.reset == true){
             this.startText.setText('Sandwich Quest ');
-            this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man ');
+            this.startText1.setText('Go on a Journey as \'Bert\', collect coins, and purchase a sandwich from the fabled Sandwich Man ');
             this.startText2.setText('Press S: Start ');
             this.startText3.setText('Press E: View Obtained Sandwiches ');
             this.warning.setText('CONTROLS: ARROWS + SPACEBAR, T TO INTERACT WITH SPARKLY OBJECTS ');
@@ -659,7 +659,7 @@ reloadText() {
             this.reset = false;
         }else{
             this.startText.setText('Sandwich Quest');
-            this.startText1.setText('Go on a Journey as \'Bibo\', collect coins, and purchase a sandwich from the fabled Sandwich Man');
+            this.startText1.setText('Go on a Journey as \'Bert\', collect coins, and purchase a sandwich from the fabled Sandwich Man');
             this.startText2.setText('Press S: Start');
             this.startText3.setText('Press E: View Obtained Sandwiches');
             this.warning.setText('CONTROLS: ARROWS + SPACEBAR, T TO INTERACT WITH SPARKLY OBJECTS');
